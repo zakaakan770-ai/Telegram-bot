@@ -3,6 +3,9 @@ import requests
 import phonenumbers
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+def get_flag(country_code):
+    return "".join(chr(127397 + ord(c)) for c in country_code.upper())
+
 
 TOKEN = "8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ"
 
@@ -62,11 +65,11 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         email = user['email']
         phone = generate_phone(country)
         user_id = random.randint(100000, 999999)
-
+flag = get_flag(country)
         text = f"""
 📍Address Generator
 𝗖𝗼𝘂𝗻𝘁𝗿𝘆:
-{country}
+{flag}
 𝗡𝗮𝗺𝗲: 
 {name}
 𝗔𝗱𝗱𝗿𝗲𝘀𝘀:
