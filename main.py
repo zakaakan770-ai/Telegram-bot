@@ -70,18 +70,12 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         text = f"""
 📍Address Generator
-𝗖𝗼𝘂𝗻𝘁𝗿𝘆:
-{flag}
-𝗡𝗮𝗺𝗲: 
-{name}
-𝗔𝗱𝗱𝗿𝗲𝘀𝘀:
-{street}
-𝗖𝗶𝘁𝘆/𝗧𝗼𝘄𝗻/𝗩𝗶𝗹𝗹𝗮𝗴𝗲:
-{city}
-𝗣𝗼𝘀𝘁𝗰𝗼𝗱𝗲:
-{postcode}
-𝗡𝘂𝗺𝗯𝗲𝗿:
-{phone}
+𝗖𝗼𝘂𝗻𝘁𝗿𝘆:{country}{flag}
+𝗡𝗮𝗺𝗲:{name}
+𝗔𝗱𝗱𝗿𝗲𝘀𝘀:{street}
+𝗖𝗶𝘁𝘆/𝗧𝗼𝘄𝗻/𝗩𝗶𝗹𝗹𝗮𝗴𝗲:{city}
+𝗣𝗼𝘀𝘁𝗰𝗼𝗱𝗲:{postcode}
+𝗡𝘂𝗺𝗯𝗲𝗿:{phone}
 """
 
         results.append(text.strip())
