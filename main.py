@@ -3,9 +3,9 @@ import requests
 import phonenumbers
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+
 def get_flag(country_code):
     return "".join(chr(127397 + ord(c)) for c in country_code.upper())
-
 
 TOKEN = "8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ"
 
@@ -34,7 +34,6 @@ def get_user(country):
     except:
         return None
 
-# ✅ async jetzt!
 async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
 
@@ -65,9 +64,11 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         email = user['email']
         phone = generate_phone(country)
         user_id = random.randint(100000, 999999)
-flag = get_flag(country)
 
-text = f"""
+        # ✅ ALLES HIER REIN (wichtig!)
+        flag = get_flag(country)
+
+        text = f"""
 📍Address Generator
 𝗖𝗼𝘂𝗻𝘁𝗿𝘆:
 {flag}
@@ -82,20 +83,18 @@ text = f"""
 𝗡𝘂𝗺𝗯𝗲𝗿:
 {phone}
 """
-    
-results.append(text.strip())
 
- if results:
-    await update.message.reply_text("\n\n---\n\n".join(results))
-else:
-    await update.message.reply_text("❌ Fehler beim Laden")
+        results.append(text.strip())
+
+    # ✅ DAS MUSS AUSSERHALB DER FOR SCHLEIFE BLEIBEN
+    if results:
+        await update.message.reply_text("\n\n---\n\n".join(results))
+    else:
+        await update.message.reply_text("❌ Fehler beim Laden")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Selam Quzeng"
-    )
+    await update.message.reply_text("Selam Quzeng")
 
-# 🚀 Start
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
