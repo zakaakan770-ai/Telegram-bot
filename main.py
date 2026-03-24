@@ -6,6 +6,7 @@ import os
 
 TOKEN = os.getenv("8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ")
 
+
 # 🌍 Länder Mapping
 countries = {
     "DE": "de", "US": "us", "FR": "fr", "GB": "gb",
