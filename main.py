@@ -66,7 +66,7 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         phone = generate_phone(country)
         user_id = random.randint(100000, 999999)
 flag = get_flag(country)
-        text = f"""
+text = f"""
 📍Address Generator
 𝗖𝗼𝘂𝗻𝘁𝗿𝘆:
 {flag}
