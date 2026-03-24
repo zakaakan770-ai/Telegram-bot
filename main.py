@@ -1,45 +1,54 @@
 import random
 import requests
-import phonenumbers
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import os
 
-def get_flag(country_code):
-    return "".join(chr(127397 + ord(c)) for c in country_code.upper())
+TOKEN = os.getenv("TOKEN")
 
-TOKEN = "8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ"
-
+# 🌍 Länder Mapping
 countries = {
     "DE": "de", "US": "us", "FR": "fr", "GB": "gb",
     "ES": "es", "IT": "it", "NL": "nl", "CH": "ch",
     "TR": "tr", "IN": "in", "BR": "br", "CA": "ca",
     "AU": "au", "DK": "dk", "FI": "fi", "NO": "no",
-    "IE": "ie", "MX": "mx", "TH": "th", "VN": "vn",
+    "IE": "ie", "MX": "mx"
 }
 
-def generate_phone(region):
-    try:
-        number = phonenumbers.example_number(region.upper())
-        return phonenumbers.format_number(
-            number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-        )
-    except:
-        return "N/A"
+# 🇩🇪 Flag Generator
+def get_flag(country_code):
+    return "".join(chr(127397 + ord(c)) for c in country_code.upper())
 
+# 📞 Realistischere Nummern
+def generate_phone(region):
+    prefixes = {
+        "DE": "+49 15",
+        "US": "+1 20",
+        "FR": "+33 6",
+        "GB": "+44 7",
+        "TR": "+90 5"
+    }
+
+    prefix = prefixes.get(region.upper(), "+00")
+    number = random.randint(1000000, 9999999)
+    return f"{prefix}{number}"
+
+# 👤 User Daten holen
 def get_user(country):
     try:
-        url = f"https://randomuser.me/api/?nat={country}"
+        url = f"https://randomuser.me/api/?nat={country}&inc=name,location,email&noinfo"
         res = requests.get(url, timeout=5).json()
         return res["results"][0]
     except:
         return None
 
+# 🤖 Fake Generator
 async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
 
     amount = 1
     if len(args) >= 2 and args[1].isdigit():
-        amount = min(int(args[1]), 10)
+        amount = min(int(args[1]), 5)
 
     if args:
         country = args[0].upper()
@@ -57,45 +66,54 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not user:
             continue
 
-        name = f"{user['name']['first']}.title()} {user['name']['last']}.title()}"
-        street = f"{user['location']['street']['name']}.title()} {user['location']['street']['number']}"
+        # ✨ Schöne Daten
+        name = f"{user['name']['first'].title()} {user['name']['last'].title()}"
+        street_name = user['location']['street']['name'].title()
+        street = f"{street_name} {random.randint(1, 200)}"
         city = user['location']['city'].title()
-        postcode = user['location']['postcode']
+        postcode = str(user['location']['postcode'])
         email = user['email']
         phone = generate_phone(country)
-        user_id = random.randint(100000, 999999)
 
-        # ✅ ALLES HIER REIN (wichtig!)
         flag = get_flag(country)
 
+        # 🎨 SCHÖNER OUTPUT
         text = f"""
-📍Address Generator
+📍 *Address Generator*
 
-𝗖𝗼𝘂𝗻𝘁𝗿𝘆: {country}{flag}
+🌍 *Country:* {country} {flag}
 
-𝗡𝗮𝗺𝗲: {name}
+👤 *Name:*
+{name}
 
-𝗔𝗱𝗱𝗿𝗲𝘀𝘀: {street}
+🏠 *Address:*
+{street}
 
-𝗖𝗶𝘁𝘆/𝗧𝗼𝘄𝗻/𝗩𝗶𝗹𝗹𝗮𝗴𝗲: {city}
+🏙️ *City:*
+{city}
 
-𝗣𝗼𝘀𝘁𝗰𝗼𝗱𝗲: {postcode}
+📮 *Postcode:*
+{postcode}
 
-𝗡𝘂𝗺𝗯𝗲𝗿: {phone}
+📞 *Phone:*
+{phone}
 
+📧 *Email:*
+{email}
 """
 
         results.append(text.strip())
 
-    # ✅ DAS MUSS AUSSERHALB DER FOR SCHLEIFE BLEIBEN
     if results:
-        await update.message.reply_text("\n\n---\n\n".join(results))
+        await update.message.reply_text("\n\n━━━━━━━━━━━━━━\n\n".join(results), parse_mode="Markdown")
     else:
-        await update.message.reply_text("❌ Fehler beim Laden")
+        await update.message.reply_text("❌ Fehler beim Generieren")
 
+# ▶️ Start Command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Selam Quzeng")
+    await update.message.reply_text("Bot läuft 🚀")
 
+# 🚀 Bot starten
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
