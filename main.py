@@ -70,6 +70,7 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         text = f"""
 📍Address Generator
+
 𝗖𝗼𝘂𝗻𝘁𝗿𝘆: {country}{flag}
 
 𝗡𝗮𝗺𝗲: {name}
