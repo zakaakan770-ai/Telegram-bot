@@ -66,6 +66,7 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         phone = generate_phone(country)
         user_id = random.randint(100000, 999999)
 flag = get_flag(country)
+
 text = f"""
 📍Address Generator
 𝗖𝗼𝘂𝗻𝘁𝗿𝘆:
@@ -84,10 +85,10 @@ text = f"""
     
 results.append(text.strip())
 
-    if results:
-        await update.message.reply_text("\n\n---\n\n".join(results))
-    else:
-        await update.message.reply_text("❌ Fehler beim Laden")
+ if results:
+    await update.message.reply_text("\n\n---\n\n".join(results))
+else:
+    await update.message.reply_text("❌ Fehler beim Laden")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
