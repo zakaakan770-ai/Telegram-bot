@@ -81,7 +81,8 @@ text = f"""
 𝗡𝘂𝗺𝗯𝗲𝗿:
 {phone}
 """
-        results.append(text.strip())
+    
+results.append(text.strip())
 
     if results:
         await update.message.reply_text("\n\n---\n\n".join(results))
