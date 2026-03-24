@@ -4,7 +4,9 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import os
 
-TOKEN = os.getenv("8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ")
+TOKEN = os.getenv("addy")
+print("TOKEN DEBUG:", TOKEN)
+
 
 
 # 🌍 Länder Mapping
