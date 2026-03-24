@@ -57,9 +57,9 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not user:
             continue
 
-        name = f"{user['name']['first']} {user['name']['last']}"
-        street = f"{user['location']['street']['name']} {user['location']['street']['number']}"
-        city = user['location']['city']
+        name = f"{user['name']['first']}.title()} {user['name']['last']}.title()}"
+        street = f"{user['location']['street']['name']}.title()} {user['location']['street']['number']}"
+        city = user['location']['city'].title()
         postcode = user['location']['postcode']
         email = user['email']
         phone = generate_phone(country)
