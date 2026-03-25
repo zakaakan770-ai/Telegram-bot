@@ -14,7 +14,7 @@ countries = {
     "ES": "es", "IT": "it", "NL": "nl", "CH": "ch",
     "TR": "tr", "IN": "in", "BR": "br", "CA": "ca",
     "AU": "au", "DK": "dk", "FI": "fi", "NO": "no",
-    "IE": "ie", "MX": "mx", "SRB": "srb"
+    "IE": "ie", "MX": "mx", "SRB": "srb", "SERBIA", "serbia"
 }
 
 # 🇩🇪 Flag Generator
