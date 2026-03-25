@@ -113,7 +113,7 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ▶️ Start Command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Bot läuft 🚀")
+    await update.message.reply_text("Selam Quzeng")
 
 # 🚀 Bot starten
 app = ApplicationBuilder().token(TOKEN).build()
