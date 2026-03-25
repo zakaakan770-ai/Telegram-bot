@@ -83,24 +83,24 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = f"""
 📍 *Address Generator*
 
-🌍 *Country:* {country} {flag}
+   *Country:* {country} {flag}
 
-👤 *Name:*
+*Name:*
 {name}
 
-🏠 *Address:*
+*Address:*
 {street}
 
-🏙️ *City:*
+*City:*
 {city}
 
-📮 *Postcode:*
+*Postcode:*
 {postcode}
 
-📞 *Phone:*
+*Phone:*
 {phone}
 
-📧 *Email:*
+*Email:*
 {email}
 """
 
