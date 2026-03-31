@@ -15,7 +15,17 @@ countries = {
     "XK": "xk"
 }
 
-# 🇽🇰 Flag Fix
+# 🇽🇰 Kosovo Namen
+kosovo_names = [
+    "Muhamet Fejzi",
+    "Arben Krasniqi",
+    "Besnik Berisha",
+    "Luan Gashi",
+    "Flamur Shala",
+    "Valon Hoxha"
+]
+
+# 🇩🇪 Flag Generator
 def get_flag(country_code):
     if country_code.upper() == "XK":
         return "🇽🇰"
@@ -33,12 +43,11 @@ def generate_phone(region):
         "MY": "+60 1",
         "XK": "+383 4"
     }
-
     prefix = prefixes.get(region.upper(), "+00")
     number = random.randint(1000000, 9999999)
     return f"{prefix}{number}"
 
-# 👤 API Daten
+# 👤 User Daten holen
 def get_user(country):
     try:
         url = f"https://randomuser.me/api/?nat={country}&inc=name,location,email&noinfo"
@@ -47,37 +56,7 @@ def get_user(country):
     except:
         return None
 
-# 🇽🇰 Kosovo Daten
-kosovo_names = [
-    "Muhamet Fejzi",
-    "Arben Krasniqi",
-    "Besnik Gashi",
-    "Valon Berisha",
-    "Driton Hoxha",
-    "Liridon Shala",
-    "Flamur Thaçi",
-    "Ermal Kastrati"
-]
-
-kosovo_cities = [
-    "Pristina",
-    "Prizren",
-    "Gjilan",
-    "Peja",
-    "Gjakova",
-    "Ferizaj",
-    "Mitrovica"
-]
-
-kosovo_streets = [
-    "Rruga e Dardanise",
-    "Rruga Deshmoret e Kombit",
-    "Rruga Bill Clinton",
-    "Rruga Ibrahim Rugova",
-    "Rruga UCK"
-]
-
-# 🤖 Generator
+# 🤖 Fake Generator
 async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
 
@@ -96,21 +75,22 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     results = []
 
     for _ in range(amount):
+        user = get_user(countries[country])
 
+        if not user:
+            continue
+
+        # ✨ Daten
         if country == "XK":
             name = random.choice(kosovo_names)
-            street = f"{random.choice(kosovo_streets)} {random.randint(1,100)}"
-            city = random.choice(kosovo_cities)
-            postcode = str(random.randint(10000, 70000))
+            street = f"Rruga {random.choice(['Skenderbeu', 'Nënë Tereza', 'Adem Jashari'])} {random.randint(1, 100)}"
+            city = random.choice(["Pristina", "Prizren", "Peja", "Gjakova"])
+            postcode = str(random.randint(10000, 99999))
             email = name.lower().replace(" ", ".") + "@example.com"
-
         else:
-            user = get_user(countries[country])
-            if not user:
-                continue
-
             name = f"{user['name']['first'].title()} {user['name']['last'].title()}"
-            street = f"{user['location']['street']['name'].title()} {random.randint(1,200)}"
+            street_name = user['location']['street']['name'].title()
+            street = f"{street_name} {random.randint(1, 200)}"
             city = user['location']['city'].title()
             postcode = str(user['location']['postcode'])
             email = user['email']
@@ -149,11 +129,11 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❌ Fehler beim Generieren")
 
-# ▶️ Start
+# ▶️ Start Command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Selam Quzeng")
 
-# 🚀 Start Bot
+# 🚀 Bot starten
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
