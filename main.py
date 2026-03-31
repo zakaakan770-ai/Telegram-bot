@@ -1,21 +1,20 @@
 import random
-from faker import Faker
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import requests
+from telegram.ext import Updater, CommandHandler
 
 TOKEN = "8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ"
 
 # 🌍 Länder Mapping
 countries = {
-    "DE": "de_DE", "US": "en_US", "FR": "fr_FR", "GB": "en_GB",
-    "ES": "es_ES", "IT": "it_IT", "NL": "nl_NL", "CH": "de_CH",
-    "TR": "tr_TR", "IN": "en_IN", "BR": "pt_BR", "CA": "en_CA",
-    "AU": "en_AU", "DK": "da_DK", "FI": "fi_FI", "NO": "no_NO",
-    "IE": "en_IE", "MX": "es_MX", "RS": "sr_RS", "MY": "en_MY",
+    "DE": "de", "US": "us", "FR": "fr", "GB": "gb",
+    "ES": "es", "IT": "it", "NL": "nl", "CH": "ch",
+    "TR": "tr", "IN": "in", "BR": "br", "CA": "ca",
+    "AU": "au", "DK": "dk", "FI": "fi", "NO": "no",
+    "IE": "ie", "MX": "mx", "RS": "rs", "MY": "my",
     "XK": "xk"
 }
 
-# 🇩🇪 Flag Generator
+# 🇽🇰 Flag Fix
 def get_flag(country_code):
     if country_code.upper() == "XK":
         return "🇽🇰"
@@ -30,15 +29,25 @@ def generate_phone(region):
         "GB": "+44 7",
         "TR": "+90 5",
         "RS": "+381 6",
-        "MY": "+60 1"
+        "MY": "+60 1",
+        "XK": "+383 4"
     }
 
     prefix = prefixes.get(region.upper(), "+00")
     number = random.randint(1000000, 9999999)
     return f"{prefix}{number}"
 
-# 🤖 Fake Generator
-async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# 👤 API Daten holen
+def get_user(country):
+    try:
+        url = f"https://randomuser.me/api/?nat={country}&inc=name,location,email&noinfo"
+        res = requests.get(url, timeout=5).json()
+        return res["results"][0]
+    except:
+        return None
+
+# 🤖 Generator
+def gen(update, context):
     args = context.args
 
     amount = 1
@@ -48,7 +57,7 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if args:
         country = args[0].upper()
         if country not in countries:
-            await update.message.reply_text("❌ Land nicht gefunden")
+            update.message.reply_text("❌ Land nicht gefunden")
             return
     else:
         country = random.choice(list(countries.keys()))
@@ -57,42 +66,27 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for _ in range(amount):
 
-        # 🇽🇰 KOSOVO CUSTOM
+        # Kosovo Spezial (realistischere Daten)
         if country == "XK":
-            name = random.choice([
-                "Arben Krasniqi", "Besnik Berisha", "Luan Gashi",
-                "Flamur Hoxha", "Valon Shala", "Driton Kelmendi",
-                "Arta Krasniqi", "Blerta Gashi", "Elira Berisha",
-                "Muhamet Fejzi"
-            ])
-
-            street = random.choice([
-                "Rruga Bill Clinton", "Rruga Nënë Tereza",
-                "Rruga UÇK", "Rruga Dardania", "Abdullah Presheva 228"
-            ]) + f" {random.randint(1, 200)}"
-
-            city = random.choice([
-                "Pristina", "Prizren", "Peja", "Gjakova", "Ferizaj"
-            ])
-
+            name = "Muhamet Fejzi"
+            street = f"Rruga Deshmoret e Kombit {random.randint(1,100)}"
+            city = random.choice(["Pristina", "Prizren", "Peja", "Gjilan", "Gjakova"])
             postcode = str(random.randint(10000, 70000))
-            email = name.lower().replace(" ", ".") + "@gmail.com"
-            phone = "+383 " + random.choice(["44","45","49"]) + str(random.randint(1000000,9999999))
-
-        # 🌍 ANDERE LÄNDER
+            email = "muhamet.fejzi@example.com"
         else:
-            fake = Faker(countries[country])
+            user = get_user(countries[country])
+            if not user:
+                continue
 
-            name = fake.name()
-            street = fake.street_address()
-            city = fake.city()
-            postcode = fake.postcode()
-            email = fake.email()
-            phone = generate_phone(country)
+            name = f"{user['name']['first'].title()} {user['name']['last'].title()}"
+            street = f"{user['location']['street']['name'].title()} {random.randint(1,200)}"
+            city = user['location']['city'].title()
+            postcode = str(user['location']['postcode'])
+            email = user['email']
 
+        phone = generate_phone(country)
         flag = get_flag(country)
 
-        # 🎨 DEIN ORIGINAL FORMAT (UNVERÄNDERT)
         text = f"""
 📍 *Address Generator*
 
@@ -120,19 +114,21 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         results.append(text.strip())
 
     if results:
-        await update.message.reply_text("\n\n━━━━━━━━━━━━━━\n\n".join(results), parse_mode="Markdown")
+        update.message.reply_text("\n\n━━━━━━━━━━━━━━\n\n".join(results), parse_mode="Markdown")
     else:
-        await update.message.reply_text("❌ Fehler beim Generieren")
+        update.message.reply_text("❌ Fehler beim Generieren")
 
-# ▶️ Start Command
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Selam Quzeng")
+# ▶️ Start
+def start(update, context):
+    update.message.reply_text("Selam Quzeng")
 
-# 🚀 Bot starten
-app = ApplicationBuilder().token(TOKEN).build()
+# 🚀 BOT START (ALT VERSION SAFE)
+updater = Updater(TOKEN, use_context=True)
+dp = updater.dispatcher
 
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("fake", gen))
+dp.add_handler(CommandHandler("start", start))
+dp.add_handler(CommandHandler("fake", gen))
 
 print("Bot läuft... 🚀")
-app.run_polling()
+updater.start_polling()
+updater.idle()
