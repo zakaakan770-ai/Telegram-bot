@@ -14,11 +14,14 @@ countries = {
     "ES": "es", "IT": "it", "NL": "nl", "CH": "ch",
     "TR": "tr", "IN": "in", "BR": "br", "CA": "ca",
     "AU": "au", "DK": "dk", "FI": "fi", "NO": "no",
-    "IE": "ie", "MX": "mx", "SRB": "srb"
+    "IE": "ie", "MX": "mx", "RS": "rs", "MY": "my",
+    "XK": "xk"
 }
 
 # 🇩🇪 Flag Generator
 def get_flag(country_code):
+    if country_code.upper() == "XK":
+        return "🇽🇰"
     return "".join(chr(127397 + ord(c)) for c in country_code.upper())
 
 # 📞 Realistischere Nummern
