@@ -1,20 +1,17 @@
 import random
-import requests
+from faker import Faker
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-import os
 
 TOKEN = "8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ"
 
-
-
 # 🌍 Länder Mapping
 countries = {
-    "DE": "de", "US": "us", "FR": "fr", "GB": "gb",
-    "ES": "es", "IT": "it", "NL": "nl", "CH": "ch",
-    "TR": "tr", "IN": "in", "BR": "br", "CA": "ca",
-    "AU": "au", "DK": "dk", "FI": "fi", "NO": "no",
-    "IE": "ie", "MX": "mx", "RS": "rs", "MY": "my",
+    "DE": "de_DE", "US": "en_US", "FR": "fr_FR", "GB": "en_GB",
+    "ES": "es_ES", "IT": "it_IT", "NL": "nl_NL", "CH": "de_CH",
+    "TR": "tr_TR", "IN": "en_IN", "BR": "pt_BR", "CA": "en_CA",
+    "AU": "en_AU", "DK": "da_DK", "FI": "fi_FI", "NO": "no_NO",
+    "IE": "en_IE", "MX": "es_MX", "RS": "sr_RS", "MY": "en_MY",
     "XK": "xk"
 }
 
@@ -24,28 +21,21 @@ def get_flag(country_code):
         return "🇽🇰"
     return "".join(chr(127397 + ord(c)) for c in country_code.upper())
 
-# 📞 Realistischere Nummern
+# 📞 Telefonnummern
 def generate_phone(region):
     prefixes = {
         "DE": "+49 15",
         "US": "+1 20",
         "FR": "+33 6",
         "GB": "+44 7",
-        "TR": "+90 5"
+        "TR": "+90 5",
+        "RS": "+381 6",
+        "MY": "+60 1"
     }
 
     prefix = prefixes.get(region.upper(), "+00")
     number = random.randint(1000000, 9999999)
     return f"{prefix}{number}"
-
-# 👤 User Daten holen
-def get_user(country):
-    try:
-        url = f"https://randomuser.me/api/?nat={country}&inc=name,location,email&noinfo"
-        res = requests.get(url, timeout=5).json()
-        return res["results"][0]
-    except:
-        return None
 
 # 🤖 Fake Generator
 async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -66,23 +56,43 @@ async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     results = []
 
     for _ in range(amount):
-        user = get_user(countries[country])
 
-        if not user:
-            continue
+        # 🇽🇰 KOSOVO CUSTOM
+        if country == "XK":
+            name = random.choice([
+                "Arben Krasniqi", "Besnik Berisha", "Luan Gashi",
+                "Flamur Hoxha", "Valon Shala", "Driton Kelmendi",
+                "Arta Krasniqi", "Blerta Gashi", "Elira Berisha",
+                "Muhamet Fejzi"
+            ])
 
-        # ✨ Schöne Daten
-        name = f"{user['name']['first'].title()} {user['name']['last'].title()}"
-        street_name = user['location']['street']['name'].title()
-        street = f"{street_name} {random.randint(1, 200)}"
-        city = user['location']['city'].title()
-        postcode = str(user['location']['postcode'])
-        email = user['email']
-        phone = generate_phone(country)
+            street = random.choice([
+                "Rruga Bill Clinton", "Rruga Nënë Tereza",
+                "Rruga UÇK", "Rruga Dardania", "Abdullah Presheva 228"
+            ]) + f" {random.randint(1, 200)}"
+
+            city = random.choice([
+                "Pristina", "Prizren", "Peja", "Gjakova", "Ferizaj"
+            ])
+
+            postcode = str(random.randint(10000, 70000))
+            email = name.lower().replace(" ", ".") + "@gmail.com"
+            phone = "+383 " + random.choice(["44","45","49"]) + str(random.randint(1000000,9999999))
+
+        # 🌍 ANDERE LÄNDER
+        else:
+            fake = Faker(countries[country])
+
+            name = fake.name()
+            street = fake.street_address()
+            city = fake.city()
+            postcode = fake.postcode()
+            email = fake.email()
+            phone = generate_phone(country)
 
         flag = get_flag(country)
 
-        # 🎨 SCHÖNER OUTPUT
+        # 🎨 DEIN ORIGINAL FORMAT (UNVERÄNDERT)
         text = f"""
 📍 *Address Generator*
 
