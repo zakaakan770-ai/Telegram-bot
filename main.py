@@ -1,6 +1,7 @@
 import random
 import requests
-from telegram.ext import Updater, CommandHandler
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 TOKEN = "8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ"
 
@@ -37,7 +38,7 @@ def generate_phone(region):
     number = random.randint(1000000, 9999999)
     return f"{prefix}{number}"
 
-# 👤 API Daten holen
+# 👤 API Daten
 def get_user(country):
     try:
         url = f"https://randomuser.me/api/?nat={country}&inc=name,location,email&noinfo"
@@ -46,8 +47,38 @@ def get_user(country):
     except:
         return None
 
+# 🇽🇰 Kosovo Daten
+kosovo_names = [
+    "Muhamet Fejzi",
+    "Arben Krasniqi",
+    "Besnik Gashi",
+    "Valon Berisha",
+    "Driton Hoxha",
+    "Liridon Shala",
+    "Flamur Thaçi",
+    "Ermal Kastrati"
+]
+
+kosovo_cities = [
+    "Pristina",
+    "Prizren",
+    "Gjilan",
+    "Peja",
+    "Gjakova",
+    "Ferizaj",
+    "Mitrovica"
+]
+
+kosovo_streets = [
+    "Rruga e Dardanise",
+    "Rruga Deshmoret e Kombit",
+    "Rruga Bill Clinton",
+    "Rruga Ibrahim Rugova",
+    "Rruga UCK"
+]
+
 # 🤖 Generator
-def gen(update, context):
+async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
 
     amount = 1
@@ -57,7 +88,7 @@ def gen(update, context):
     if args:
         country = args[0].upper()
         if country not in countries:
-            update.message.reply_text("❌ Land nicht gefunden")
+            await update.message.reply_text("❌ Land nicht gefunden")
             return
     else:
         country = random.choice(list(countries.keys()))
@@ -66,13 +97,13 @@ def gen(update, context):
 
     for _ in range(amount):
 
-        # Kosovo Spezial (realistischere Daten)
         if country == "XK":
-            name = "Muhamet Fejzi"
-            street = f"Rruga Deshmoret e Kombit {random.randint(1,100)}"
-            city = random.choice(["Pristina", "Prizren", "Peja", "Gjilan", "Gjakova"])
+            name = random.choice(kosovo_names)
+            street = f"{random.choice(kosovo_streets)} {random.randint(1,100)}"
+            city = random.choice(kosovo_cities)
             postcode = str(random.randint(10000, 70000))
-            email = "muhamet.fejzi@example.com"
+            email = name.lower().replace(" ", ".") + "@example.com"
+
         else:
             user = get_user(countries[country])
             if not user:
@@ -114,21 +145,19 @@ def gen(update, context):
         results.append(text.strip())
 
     if results:
-        update.message.reply_text("\n\n━━━━━━━━━━━━━━\n\n".join(results), parse_mode="Markdown")
+        await update.message.reply_text("\n\n━━━━━━━━━━━━━━\n\n".join(results), parse_mode="Markdown")
     else:
-        update.message.reply_text("❌ Fehler beim Generieren")
+        await update.message.reply_text("❌ Fehler beim Generieren")
 
 # ▶️ Start
-def start(update, context):
-    update.message.reply_text("Selam Quzeng")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Selam Quzeng")
 
-# 🚀 BOT START (ALT VERSION SAFE)
-updater = Updater(TOKEN, use_context=True)
-dp = updater.dispatcher
+# 🚀 Start Bot
+app = ApplicationBuilder().token(TOKEN).build()
 
-dp.add_handler(CommandHandler("start", start))
-dp.add_handler(CommandHandler("fake", gen))
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("fake", gen))
 
 print("Bot läuft... 🚀")
-updater.start_polling()
-updater.idle()
+app.run_polling()
