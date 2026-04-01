@@ -17,7 +17,7 @@ countries = {
 
 # 🇽🇰 Kosovo Namen
 kosovo_names = [
-    "Muhamet Fejzi",
+    "Senat Fejzi",
     "Arben Krasniqi",
     "Besnik Berisha",
     "Luan Gashi",
