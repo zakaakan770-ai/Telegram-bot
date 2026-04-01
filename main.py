@@ -1,102 +1,136 @@
 import random
-import requests
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 TOKEN = "8310232049:AAF3BLFwO2XqgDrxLhQD2--G-PDZ9gRCUtQ"
 
-# 🌍 80+ Länder Codes
-all_countries = [
-    "de","us","gb","fr","it","es","nl","ch","tr","ca","au","in","br","my",
-    "dk","fi","no","se","ie","mx","ar","cl","co","za","ng","eg","sa","ae",
-    "jp","kr","cn","th","vn","ph","id","pk","bd","pl","cz","at","be","pt",
-    "gr","hu","ro","sk","si","hr","bg","lt","lv","ee"
-]
+# 🌍 Länder Daten (viele Städte + Namen)
+data = {
+    "DE": {
+        "cities": [
+            "Berlin","Hamburg","München","Köln","Frankfurt","Stuttgart","Düsseldorf",
+            "Dortmund","Essen","Leipzig","Bremen","Dresden","Hannover","Nürnberg",
+            "Bochum","Wuppertal","Bielefeld","Bonn","Mannheim","Karlsruhe",
+            "Augsburg","Wiesbaden","Münster","Gelsenkirchen","Aachen",
+            "Braunschweig","Chemnitz","Kiel","Magdeburg","Freiburg"
+        ],
+        "names": [
+            "Lukas Müller","Leon Schmidt","Finn Schneider","Paul Fischer",
+            "Jonas Weber","Max Wagner","Luis Becker","Noah Hoffmann",
+            "Elias Schäfer","Tim Koch","David Bauer","Jan Richter",
+            "Nico Klein","Felix Wolf","Moritz Schröder","Kevin Neumann"
+        ],
+        "prefix": "+49 15"
+    },
 
-# 🇽🇰 Kosovo FIX
-kosovo_data = {
-    "first": ["Arben","Luan","Senat","Driton","Valon"],
-    "last": ["Krasniqi","Gashi","Fejzi","Berisha","Shala"],
-    "cities": ["Pristina","Prizren","Peja","Gjilan","Gjakova"],
-    "streets": ["Skenderbeu","Nënë Tereza","Adem Jashari"]
+    "US": {
+        "cities": [
+            "New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia",
+            "San Antonio","San Diego","Dallas","San Jose","Austin","Jacksonville",
+            "San Francisco","Columbus","Charlotte","Indianapolis","Seattle",
+            "Denver","Boston","Detroit","Nashville","Memphis","Portland"
+        ],
+        "names": [
+            "James Smith","Michael Johnson","Robert Williams","David Brown",
+            "William Jones","Richard Garcia","Joseph Miller","Thomas Davis",
+            "Charles Wilson","Daniel Anderson","Matthew Taylor"
+        ],
+        "prefix": "+1 20"
+    },
+
+    "UK": {
+        "cities": [
+            "London","Manchester","Birmingham","Leeds","Glasgow","Liverpool",
+            "Bristol","Sheffield","Edinburgh","Leicester","Coventry",
+            "Nottingham","Newcastle","Oxford","Cambridge"
+        ],
+        "names": [
+            "Oliver Smith","George Jones","Harry Taylor","Jack Brown",
+            "Charlie Williams","Thomas Wilson","Oscar Davies"
+        ],
+        "prefix": "+44 7"
+    },
+
+    "XK": {
+        "cities": [
+            "Pristina","Prizren","Peja","Gjakova","Gjilan","Ferizaj",
+            "Mitrovica","Podujeva","Vushtrri","Suhareka","Rahovec"
+        ],
+        "names": [
+            "Muhamet Fejzi","Arben Krasniqi","Besnik Berisha",
+            "Luan Gashi","Flamur Shala","Valon Hoxha",
+            "Jeton Mustafa","Blerim Selimi","Agon Zeka"
+        ],
+        "prefix": "+383 4"
+    }
 }
 
+# 🌍 Flag
 def get_flag(code):
-    if code.upper() == "XK":
+    if code == "XK":
         return "🇽🇰"
-    return "".join(chr(127397 + ord(c)) for c in code.upper())
+    return "".join(chr(127397 + ord(c)) for c in code)
 
-def get_user(country):
-    try:
-        url = f"https://randomuser.me/api/?nat={country}&results=1"
-        res = requests.get(url, timeout=5).json()
-        return res["results"][0]
-    except:
-        return None
+# 📞 Nummer
+def generate_phone(prefix):
+    return f"{prefix}{random.randint(1000000,9999999)}"
 
-async def gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# 🤖 Generator
+async def fake(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
 
-    # zufälliges Land aus 80+
-    country = random.choice(all_countries).upper()
-
-    # 🇽🇰 Kosovo separat
-    if country == "XK":
-        name = f"{random.choice(kosovo_data['first'])} {random.choice(kosovo_data['last'])}"
-        city = random.choice(kosovo_data["cities"])
-        street = f"{random.choice(kosovo_data['streets'])} {random.randint(1,200)}"
-        postcode = str(random.randint(10000,99999))
-        phone = f"+383 {random.randint(40,49)} {random.randint(100000,999999)}"
-        email = name.lower().replace(" ", ".") + "@example.com"
-
-    else:
-        user = get_user(country.lower())
-
-        if not user:
-            await update.message.reply_text("❌ Fehler")
+    if args:
+        country = args[0].upper()
+        if country not in data:
+            await update.message.reply_text("❌ Land nicht vorhanden")
             return
+    else:
+        country = random.choice(list(data.keys()))
 
-        name = f"{user['name']['first']} {user['name']['last']}"
-        street = f"{user['location']['street']['name']} {random.randint(1,200)}"
-        city = user['location']['city']
-        postcode = str(user['location']['postcode'])
-        email = user['email']
+    d = data[country]
 
-        phone = f"+{random.randint(1,99)} {random.randint(100000000,999999999)}"
-
-    flag = get_flag(country)
+    name = random.choice(d["names"])
+    city = random.choice(d["cities"])
+    street = f"{random.choice(['Main Street','Bahnhofstraße','High Street','Rue'])} {random.randint(1,200)}"
+    postcode = random.randint(10000,99999)
+    phone = generate_phone(d["prefix"])
+    email = name.lower().replace(" ", ".") + "@example.com"
 
     text = f"""
-📍 *Address Generator*
+📍 Address Generator
 
-   *Country:* {country} {flag}
+Country: {country} {get_flag(country)}
 
-*Name:*
+Name:
 {name}
 
-*Address:*
+Address:
 {street}
 
-*City:*
+City:
 {city}
 
-*Postcode:*
+Postcode:
 {postcode}
 
-*Phone:*
+Phone:
 {phone}
 
-*Email:*
+Email:
 {email}
 """
 
-    await update.message.reply_text(text.strip(), parse_mode="Markdown")
+    await update.message.reply_text(text)
 
+# ▶️ Start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Selam Quzeng")
+    await update.message.reply_text("Bot läuft 🚀")
 
+# 🚀 Run
 app = ApplicationBuilder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("fake", gen))
 
-print("Bot läuft 🚀")
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("fake", fake))
+
+print("Bot läuft...")
 app.run_polling()
